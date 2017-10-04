@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
  * @author petr.adamek@embedit.cz
  */
 public class CurrencyConvertorImpl implements CurrencyConvertor {
-    final Logger logger = LoggerFactory.getLogger(CurrencyConvertorImpl.class);
 
+    final Logger logger = LoggerFactory.getLogger(CurrencyConvertorImpl.class);
     private final ExchangeRateTable exchangeRateTable;
     //private final Logger logger = LoggerFactory.getLogger(CurrencyConvertorImpl.class);
 
@@ -23,18 +23,30 @@ public class CurrencyConvertorImpl implements CurrencyConvertor {
 
     @Override
     public BigDecimal convert(Currency sourceCurrency, Currency targetCurrency, BigDecimal sourceAmount) {
-        if (sourceCurrency == null || targetCurrency == null || sourceAmount == null) {
-            throw new IllegalArgumentException("Some argument is not set.");
+        logger.trace(String.format("Calling convert(%s, %s, %s)"),sourceCurrency, targetCurrency, sourceAmount);
+
+        if (sourceCurrency == null) {
+            throw new IllegalArgumentException("Source currency is not set.");
+        }
+
+        if (targetCurrency == null) {
+            throw new IllegalArgumentException("Target currency is not set.");
+        }
+
+        if (sourceAmount == null) {
+            throw new IllegalArgumentException("Source amount is not set.");
         }
 
         try {
             BigDecimal exchangeRate = exchangeRateTable.getExchangeRate(sourceCurrency,targetCurrency);
             if (exchangeRate == null) {
+                logger.warn(String.format("Unknown exchange rate with currencies: %s, %s."), sourceCurrency, targetCurrency);
                 throw new UnknownExchangeRateException("You cannot convert these two currencies.");
             }
 
             return sourceAmount.multiply(new BigDecimal(exchangeRate.toString()));
         } catch (ExternalServiceFailureException e) {
+            logger.error("Error connecting to exchange rate table - ", e);
             throw new RuntimeException("Some error in external service.");
         }
     }
