@@ -11,6 +11,15 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import cz.fi.muni.pa165.entity.Category;
 import cz.fi.muni.pa165.entity.Product;
+import cz.fi.muni.pa165.entity.Color;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.Calendar;
+import java.util.Date;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
 
 public class MainJavaSe {
 	private static EntityManagerFactory emf;
@@ -22,7 +31,7 @@ public class MainJavaSe {
 		emf = Persistence.createEntityManagerFactory("default");
 		try {
 			// BEGIN YOUR CODE
-			task05();
+			task06();
 			// END YOUR CODE
 		} finally {
 			emf.close();
@@ -110,8 +119,14 @@ public class MainJavaSe {
 		// Additional task: Change the underlying table of Product entity to be ESHOP_PRODUCTS. After you do this, check this by inspecting console output (the CREATE TABLE statement)
 		//
 		// To test your code uncomment the commented code at the end of this method.
-
-
+                
+                Product product = new Product("Guitar", Color.BLACK, Date.from(LocalDate.of(2011,1,20).atTime(0,0,0).toInstant(ZoneOffset.UTC)));
+                EntityManager em0 = emf.createEntityManager();
+                em0.getTransaction().begin();
+                em0.persist(product);
+                em0.getTransaction().commit();
+                em0.close();
+                
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
 		Product p = em.createQuery("select p from Product p", Product.class)
@@ -119,7 +134,7 @@ public class MainJavaSe {
 		em.getTransaction().commit();
 		em.close();
 
-	/** TODO Uncomment the following test code after you are finished!
+	//TODO Uncomment the following test code after you are finished!
 	 
 		assertEq(p.getName(), "Guitar");
 		Calendar cal = Calendar.getInstance();
@@ -153,7 +168,7 @@ public class MainJavaSe {
 	
 
 		System.out.println("Task6 ok!");
-		*/
+		
 	}
 	
 	private static void task08() {
